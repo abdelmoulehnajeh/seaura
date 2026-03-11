@@ -1,0 +1,40 @@
+/* Font MUST be at the very top for CSS compliance */
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #000000;
+  --color-secondary: #f0f2f5;
+
+  --animate-shimmer: shimmer 2s infinite linear;
+
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* Base Styles */
+@layer base {
+
+  html,
+  body {
+    @apply h-full w-full bg-white text-black;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Utility Overrides */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-3xl bg-white/70 border border-white/50;
+  }
+}
