@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from 'sweetalert2';
 import Link from "next/link";
 
 export default function SignUp() {
@@ -13,17 +14,39 @@ export default function SignUp() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name })
-        });
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name })
+            });
 
-        if (res.ok) {
-            router.push("/auth/signin");
-        } else {
             const data = await res.json();
-            alert(data.message || "Registration failed");
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Compte créé !',
+                    text: 'Vous pouvez maintenant vous connecter.',
+                    confirmButtonColor: '#000'
+                });
+                router.push("/auth/signin");
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: data.message || "Registration failed",
+                    confirmButtonColor: '#000'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors de l\'inscription.',
+                confirmButtonColor: '#000'
+            });
         }
     };
 

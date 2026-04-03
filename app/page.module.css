@@ -12,17 +12,18 @@
   height: 60px;
   border-radius: 50%;
   background: #F8F3E8;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #000;
   cursor: pointer;
   z-index: 2000;
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: translateY(150px);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(150px) translateZ(0);
   opacity: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  will-change: transform, opacity;
 }
 
 .scrollTopVisible {
@@ -34,7 +35,7 @@
   background: #000;
   color: #fff;
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .noScroll {
@@ -54,7 +55,8 @@
   background: transparent;
   color: #fff;
   z-index: 1000;
-  transition: background 0.3s ease, color 0.3s ease, height 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, height 0.3s ease, backdrop-filter 0.3s ease;
+  will-change: background, color, height;
 }
 
 .headerScrolled {
@@ -364,6 +366,8 @@
   opacity: 0;
   transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 .heroImage.active {
@@ -428,6 +432,8 @@
 .catImg {
   object-fit: cover;
   transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .categoryCard:hover .catImg {
@@ -477,8 +483,7 @@
   background: url('/images/newsletter_bg.png');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
-  /* Parallax feel */
+  background-attachment: scroll; /* Changed to scroll for performance */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -508,6 +513,8 @@
   border-radius: 2px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 15px 45px rgba(0, 0, 0, 0.05);
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .newsletterTitle {
@@ -674,6 +681,125 @@
   color: #666;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Instagram Feed Section */
+.instagramFeed {
+  padding: 120px 40px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.instaHeading {
+  font-size: 32px;
+  font-weight: 400;
+  margin-bottom: 60px;
+  color: #000;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.instaFeedWrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 60px;
+  background: transparent;
+  padding: 40px 0;
+}
+
+.instaTicker {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 40s linear infinite;
+  gap: 30px;
+}
+
+.instaTicker:hover {
+  animation-play-state: paused;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.instaCard {
+  width: 320px;
+  height: 320px;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.instaCard:hover {
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 30px 70px rgba(255, 0, 127, 0.2);
+}
+
+
+.instaImg {
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.instaCard:hover .instaImg {
+  transform: scale(1.08);
+}
+
+.instaOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.5s ease;
+  backdrop-filter: blur(2px);
+}
+
+.instaCard:hover .instaOverlay {
+  opacity: 1;
+}
+
+.instaIcon {
+  color: #fff;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.instaCard:hover .instaIcon {
+  transform: scale(1.2);
+}
+
+.joinUsBtn {
+  background: #ff007f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 10px 25px rgba(255, 0, 127, 0.2);
+}
+
+.joinUsBtn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(255, 0, 127, 0.3);
+  background: #e60072;
 }
 
 /* Responsive Styles */
@@ -1074,5 +1200,210 @@
     right: 25px;
     width: 50px;
     height: 50px;
+  }
+}
+
+/* Chat System */
+.chatBubble {
+  position: fixed;
+  bottom: 40px;
+  right: 120px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2100;
+  border: none;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: floatChat 3s ease-in-out infinite;
+}
+
+@keyframes floatChat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.chatBubbleOpen {
+  background: #fff;
+  color: #000;
+  transform: rotate(90deg);
+}
+
+.chatBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ff007f;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatWindow {
+  position: fixed;
+  bottom: 120px;
+  right: 40px;
+  width: 380px;
+  height: 600px;
+  max-height: calc(100vh - 160px);
+  background: #fff;
+  border-radius: 30px;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.15);
+  z-index: 2200;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUpChat 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@keyframes slideUpChat {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chatHeader {
+  padding: 25px 30px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatBody {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.messageWrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.msgClient {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.msgAdmin {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.messageBubble {
+  padding: 14px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.msgClient .messageBubble {
+  background: #000;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msgAdmin .messageBubble {
+  background: #fff;
+  color: #111;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.messageTime {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #bbb;
+  margin-top: 6px;
+}
+
+.chatFooter {
+  padding: 20px 25px 35px;
+  background: #fff;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chatInput {
+  flex: 1;
+  background: #f8f8f8;
+  border: none;
+  padding: 16px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.chatInput:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px #000;
+}
+
+.sendBtn {
+  background: #000;
+  color: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .chatBubble {
+    right: 25px;
+    bottom: 100px;
+  }
+
+  .chatWindow {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+    max-height: 100vh;
   }
 }

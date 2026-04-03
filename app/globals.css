@@ -26,10 +26,21 @@
 
   html,
   body {
-    @apply h-full w-full bg-white text-black;
+    @apply w-full bg-white text-black;
+    height: auto !important;
+    min-height: 100vh;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    overflow-y: auto !important;
   }
+}
+
+html, body {
+  height: auto !important;
+  overflow-y: auto !important;
 }
 
 /* Utility Overrides */

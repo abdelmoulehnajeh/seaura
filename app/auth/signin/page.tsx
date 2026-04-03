@@ -3,11 +3,14 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from 'sweetalert2';
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +32,12 @@ export default function SignIn() {
                 router.push("/dashboard");
             }
         } else {
-            alert("Invalid credentials");
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Email ou mot de passe incorrect.',
+                confirmButtonColor: '#000'
+            });
         }
     };
 
@@ -88,14 +96,23 @@ export default function SignIn() {
                             {/* Premium Input: Password */}
                             <div className="space-y-3">
                                 <label className="text-[11px] font-bold tracking-[0.2em] text-black/50 uppercase ml-1">Mot de passe</label>
-                                <input
-                                    type="password"
-                                    className="w-full h-[72px] bg-gray-50 border border-gray-100 rounded-[22px] px-8 py-5 outline-none focus:bg-white focus:ring-8 focus:ring-black/5 focus:border-black transition-all duration-300 text-sm font-medium placeholder:text-gray-200"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                                <div className="relative group/pass">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        className="w-full h-[72px] bg-gray-50 border border-gray-100 rounded-[22px] px-8 py-5 outline-none focus:bg-white focus:ring-8 focus:ring-black/5 focus:border-black transition-all duration-300 text-sm font-medium placeholder:text-gray-200"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-6 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-black transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

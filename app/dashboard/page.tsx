@@ -5,10 +5,68 @@ import { redirect } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingCart, LogOut, Package, Heart, User, ChevronRight, Home } from "lucide-react";
+import ChatWidget from "@/components/ChatWidget";
 
 export default function ClientDashboard() {
     const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState("overview");
+    const [wishlist, setWishlist] = useState<any[]>([]);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get("tab");
+        if (tab === "wishlist") setActiveTab("wishlist");
+
+        const savedWishlist = localStorage.getItem('seaura_wishlist');
+        if (savedWishlist) {
+            try {
+                setWishlist(JSON.parse(savedWishlist));
+            } catch (e) {
+                console.error("Wishlist load error:", e);
+            }
+        }
+
+        if (session?.user?.email) {
+            const fetchDbWishlist = async () => {
+                try {
+                    const res = await fetch('/api/graphql', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: `query($email: String!) { wishlist(email: $email) }`,
+                            variables: { email: session.user.email }
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.data?.wishlist) {
+                        const dbItems = JSON.parse(data.data.wishlist);
+                        if (dbItems.length > 0) {
+                            setWishlist(dbItems);
+                            localStorage.setItem('seaura_wishlist', JSON.stringify(dbItems));
+                        }
+                    }
+                } catch (e) { }
+            };
+            fetchDbWishlist();
+        }
+    }, [session]);
+
+    const removeFromWishlist = (id: string) => {
+        const updated = wishlist.filter(p => p.id !== id);
+        setWishlist(updated);
+        localStorage.setItem('seaura_wishlist', JSON.stringify(updated));
+
+        if (session?.user?.email) {
+            fetch('/api/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `mutation($email: String!, $items: String!) { updateWishlist(email: $email, items: $items) }`,
+                    variables: { email: session.user.email, items: JSON.stringify(updated) }
+                })
+            }).catch(() => { });
+        }
+    };
 
     if (status === "loading") return <div className="h-screen flex items-center justify-center font-light tracking-widest text-[#1a1a1a]">CHARGEMENT...</div>;
 
@@ -87,9 +145,12 @@ export default function ClientDashboard() {
                                     <p className="text-4xl font-light">0</p>
                                     <p className="text-xs text-blue-500 mt-4 flex items-center gap-1 cursor-pointer">Voir tout <ChevronRight size={12} /></p>
                                 </div>
-                                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50">
+                                <div 
+                                    className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 cursor-pointer hover:border-pink-200 transition-colors"
+                                    onClick={() => setActiveTab("wishlist")}
+                                >
                                     <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-4">Favoris</p>
-                                    <p className="text-4xl font-light">0</p>
+                                    <p className="text-4xl font-light">{wishlist.length}</p>
                                     <p className="text-xs text-pink-500 mt-4 flex items-center gap-1 cursor-pointer">Voir tout <ChevronRight size={12} /></p>
                                 </div>
                                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50">
@@ -133,16 +194,58 @@ export default function ClientDashboard() {
                                 <h1 className="text-5xl font-light tracking-tight mb-2">Favoris</h1>
                                 <p className="text-gray-400 font-light italic">Vos pièces préférées, réunies en un seul endroit.</p>
                             </header>
-                            <div className="bg-white rounded-[3rem] p-20 text-center border border-gray-100">
-                                <Heart size={64} className="mx-auto mb-6 text-gray-100" />
-                                <h2 className="text-xl font-medium mb-2">Votre liste est vide</h2>
-                                <p className="text-gray-400 text-sm mb-8 font-light">Ajoutez des articles qui vous inspirent pour les retrouver plus tard.</p>
-                                <Link href="/" className="px-10 py-4 bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-full hover:scale-105 transition-transform inline-block">Explorer les Nouveautés</Link>
-                            </div>
+                            
+                            {wishlist.length === 0 ? (
+                                <div className="bg-white rounded-[3rem] p-20 text-center border border-gray-100">
+                                    <Heart size={64} className="mx-auto mb-6 text-gray-100" />
+                                    <h2 className="text-xl font-medium mb-2">Votre liste est vide</h2>
+                                    <p className="text-gray-400 text-sm mb-8 font-light">Ajoutez des articles qui vous inspirent pour les retrouver plus tard.</p>
+                                    <Link href="/" className="px-10 py-4 bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-full hover:scale-105 transition-transform inline-block">Explorer les Nouveautés</Link>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {wishlist.map((item) => (
+                                        <div key={item.id} className="bg-white group rounded-[2.5rem] overflow-hidden border border-gray-50 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                                            <div className="relative aspect-[4/5] overflow-hidden">
+                                                <img 
+                                                    src={item.image_url || "/images/placeholder.png"} 
+                                                    alt={item.name} 
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                                <button 
+                                                    onClick={() => removeFromWishlist(item.id)}
+                                                    className="absolute top-6 right-6 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-pink-500 shadow-lg hover:bg-pink-500 hover:text-white transition-all transform hover:rotate-90"
+                                                >
+                                                    <LogOut size={16} /> {/* Using LogOut icon as a 'remove' symbol or X if preferred, but user requested Heart logic. Let's use Trash2 for removal. */}
+                                                </button>
+                                            </div>
+                                            <div className="p-8">
+                                                <h3 className="text-lg font-light tracking-tight mb-1">{item.name}</h3>
+                                                <p className="text-xl font-medium mb-6">{item.price} €</p>
+                                                <div className="flex gap-4">
+                                                    <Link 
+                                                        href={`/product/${item.id}`}
+                                                        className="flex-1 px-6 py-4 bg-black text-white text-[9px] font-bold tracking-widest uppercase rounded-full text-center hover:opacity-80 transition-opacity"
+                                                    >
+                                                        Voir Produit
+                                                    </Link>
+                                                    <button 
+                                                        onClick={() => removeFromWishlist(item.id)}
+                                                        className="px-6 py-4 border border-gray-100 rounded-full text-[9px] font-bold tracking-widest uppercase hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        Retirer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </main>
             </div>
+            <ChatWidget userEmail={session?.user?.email} />
         </div>
     );
 }

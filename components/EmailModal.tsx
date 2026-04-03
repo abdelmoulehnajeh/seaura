@@ -1,0 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { X as CloseIcon, ArrowRight } from "lucide-react";
+import Swal from "sweetalert2";
+import styles from "./EmailModal.module.css";
+import { useUser } from "./Providers";
+
+export default function EmailModal() {
+    const { isEmailModalOpen, setIsEmailModalOpen, setUserEmail } = useUser();
+    const [email, setEmail] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!isEmailModalOpen) return null;
+
+    const handleSubscribe = async () => {
+        if (!email || !email.includes('@')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Veuillez entrer une adresse e-mail valide.',
+                confirmButtonColor: '#000'
+            });
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `mutation($email: String!) { subscribeNewsletter(email: $email) }`,
+                    variables: { email }
+                })
+            });
+            const data = await res.json();
+            if (data.data?.subscribeNewsletter) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: 'Merci pour votre inscription !',
+                    confirmButtonColor: '#000'
+                });
+                setUserEmail(email);
+                localStorage.setItem('seaura_user_email', email);
+                setIsEmailModalOpen(false);
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Une erreur est survenue. Veuillez réessayer.',
+                confirmButtonColor: '#000'
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <button className={styles.modalClose} onClick={() => setIsEmailModalOpen(false)}>
+                    <CloseIcon size={24} />
+                </button>
+
+                <div className={styles.modalBody}>
+                    <div className={styles.modalVisual}>
+                        <Image src="/images/hero.png" alt="Join Seaura" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+                    </div>
+
+                    <div className={styles.modalText}>
+                        <span className={styles.modalSubtitle}>Collection Exclusive</span>
+                        <h2 className={styles.modalTitle}>Rejoindre l'Expérience</h2>
+                        <p className={styles.modalDesc}>Inscrivez-vous pour recevoir nos dernières actualités et offres exclusives directement dans votre boîte mail.</p>
+
+                        <div className={styles.modalInputWrapper}>
+                            <input
+                                type="email"
+                                placeholder="VOTRE E-MAIL"
+                                className={styles.modalInput}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSubscribe()}
+                            />
+                            <button className={styles.modalSubmit} onClick={handleSubscribe} disabled={isSubmitting}>
+                                <ArrowRight size={20} />
+                            </button>
+                        </div>
+
+                        <p className={styles.modalLegal}>
+                            En vous inscrivant, vous acceptez notre <a href="#">Politique de Confidentialité</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div className={styles.modalBackdrop} onClick={() => setIsEmailModalOpen(false)}></div>
+        </div>
+    );
+}

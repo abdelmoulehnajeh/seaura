@@ -7,6 +7,7 @@ export const metadata: Metadata = {
 };
 
 import { Providers } from "@/components/Providers";
+import EmailModal from "@/components/EmailModal";
 
 export default function RootLayout({
   children,
@@ -23,8 +24,10 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
+          <EmailModal />
         </Providers>
       </body>
     </html>
   );
 }
+
