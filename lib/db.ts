@@ -6,6 +6,23 @@ const pool = new Pool({
 
 export const query = (text: string, params?: any[]) => pool.query(text, params);
 
+let cmsCache: any[] | null = null;
+let lastCacheUpdate: number = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
+export const getCachedHomeContent = async () => {
+  const now = Date.now();
+  if (cmsCache && (now - lastCacheUpdate < CACHE_TTL)) {
+    return cmsCache;
+  }
+  const res = await pool.query("SELECT * FROM home_content");
+  cmsCache = res.rows;
+  lastCacheUpdate = now;
+  return cmsCache;
+};
+
+export const clearCmsCache = () => { cmsCache = null; };
+
 let isInitialized = false;
 
 export const initDb = async () => {
