@@ -205,7 +205,7 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return <LoadingScreen duration={3000} onComplete={() => setIsLoading(false)} />;
   }
 
   return (

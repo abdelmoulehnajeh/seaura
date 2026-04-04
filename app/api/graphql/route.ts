@@ -410,12 +410,12 @@ const handler = startServerAndCreateNextHandler(server, {
   }
 });
 
-initDb();
-
 export async function GET(request: Request) {
+  await initDb();
   return handler(request);
 }
 
 export async function POST(request: Request) {
+  await initDb();
   return handler(request);
 }

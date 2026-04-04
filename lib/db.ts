@@ -12,6 +12,22 @@ export const initDb = async () => {
   if (isInitialized) return;
   try {
     const client = await pool.connect();
+    
+    // Quick check: If products table exists, we are likely fully initialized
+    const tableExists = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'products'
+      );
+    `);
+    
+    if (tableExists.rows[0].exists) {
+      console.log('Database already initialized, skipping checks.');
+      client.release();
+      isInitialized = true;
+      return;
+    }
+
     isInitialized = true;
 
     // Create User Table

@@ -8,7 +8,20 @@ interface LoadingScreenProps {
     onComplete?: () => void;
 }
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ duration = 3000, onComplete }: { duration?: number; onComplete?: () => void }) {
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsVisible(false);
+            if (onComplete) onComplete();
+        }, duration);
+
+        return () => clearTimeout(timer);
+    }, [duration, onComplete]);
+
+    if (!isVisible) return null;
+
     return (
         <div className="fixed inset-0 z-[9999] bg-[#F8F3E8] flex flex-col items-center justify-center transition-opacity duration-1000">
             <div className="relative mb-8 group">
